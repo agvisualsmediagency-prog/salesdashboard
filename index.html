@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AG Visuals — War Room</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;
+  --border:#2a2a2a;--border2:#333;
+  --text:#f0f0f0;--muted:#666;--muted2:#444;
+  --green:#22c55e;--green-dim:#16a34a;--green-bg:#052e16;
+  --amber:#f59e0b;--amber-bg:#1c1100;
+  --red:#ef4444;--red-bg:#1f0000;
+  --blue:#3b82f6;--blue-bg:#0c1a3a;
+  --purple:#a855f7;--purple-bg:#1a0a2e;
+  --accent:#f59e0b;
+}
+html,body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+.wr{padding:20px;max-width:1100px;margin:0 auto}
+
+/* SETUP SCREEN */
+.setup{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center}
+.setup-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:40px;max-width:520px;width:90%}
+.setup-logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;color:var(--accent);margin-bottom:8px}
+.setup-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+.setup-label{font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;font-weight:500;margin-bottom:6px}
+.setup-input{background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;width:100%;margin-bottom:16px;outline:none}
+.setup-input:focus{border-color:var(--accent)}
+.setup-btn{background:var(--accent);border:none;color:#000;padding:12px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;width:100%;margin-top:4px}
+.setup-err{color:var(--red);font-size:12px;margin-top:8px;display:none}
+.setup-note{font-size:11px;color:var(--muted);margin-top:16px;line-height:1.6}
+
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--accent)}
+.logo span{color:var(--muted);font-size:13px;font-family:'DM Sans',sans-serif;letter-spacing:0;margin-left:10px;font-weight:400}
+.status-pill{padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.pill-hit{background:var(--green-bg);color:var(--green);border:1px solid var(--green-dim)}
+.pill-behind{background:var(--red-bg);color:var(--red);border:1px solid #7f1d1d}
+.pill-close{background:var(--amber-bg);color:var(--amber);border:1px solid #78350f}
+
+/* BATTLE */
+.battle{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden}
+.battle::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#f97316,var(--accent));background-size:200% 100%;animation:sh 2s linear infinite}
+@keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sec-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:500}
+.sec-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.bt-main{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.bt-num{font-family:'Bebas Neue',sans-serif;font-size:72px;line-height:1;transition:color .3s}
+.c-hit{color:var(--green)}.c-close{color:var(--amber)}.c-behind{color:var(--red)}
+.bt-meta{flex:1;min-width:200px;max-width:260px}
+.bt-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
+.bt-row:last-child{border-bottom:none}
+.bt-row span:first-child{color:var(--muted)}
+
+/* SCOREBOARD */
+.scoreboard{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+.sc-num{font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;margin-bottom:2px}
+.sc-sub{font-size:12px;color:var(--muted)}
+.xp-wrap{height:6px;background:var(--bg4);border-radius:3px;margin:10px 0 8px;overflow:hidden}
+.xp-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.fire{position:absolute;top:10px;right:10px;font-size:10px;font-weight:700;color:var(--accent);opacity:0;transition:opacity .3s}
+.sc.hot .fire{opacity:1}
+.tier{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.t0{background:#1a1a1a;color:var(--muted)}
+.t50{background:#1c1a00;color:#a16207}
+.t75{background:#0c1a3a;color:var(--blue)}
+.t100{background:var(--green-bg);color:var(--green)}
+
+/* LOG */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.log-form{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;margin-top:14px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fl{font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;font-weight:500}
+.fi{background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:8px 12px;border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;width:100%;outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--accent)}
+.fi::placeholder{color:var(--muted2)}
+select.fi option{background:var(--bg3)}
+.btn-primary{background:var(--accent);border:none;color:#000;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:opacity .15s}
+.btn-primary:hover{opacity:.85}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-sm{background:var(--bg3);border:1px solid var(--border2);color:var(--muted);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif;letter-spacing:.5px;text-transform:uppercase;transition:all .15s}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent)}
+.log-list{margin-top:14px}
+.le{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.le:last-child{border-bottom:none}
+.le-type{font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);min-width:95px}
+.le-note{color:var(--muted);font-size:12px;flex:1}
+.le-amt{font-weight:700;color:var(--green);white-space:nowrap}
+.le-del{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:18px;padding:0 4px;line-height:1;transition:color .15s}
+.le-del:hover{color:var(--red)}
+.empty{text-align:center;padding:20px;color:var(--muted);font-size:13px}
+
+/* CHART */
+.chart-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.tabs{display:flex;gap:4px}
+.tab{background:transparent;border:1px solid var(--border2);color:var(--muted);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif;letter-spacing:.5px;text-transform:uppercase;transition:all .15s}
+.tab.active{background:var(--bg4);border-color:var(--accent);color:var(--accent);font-weight:600}
+
+/* HEATMAP */
+.hm-grid{display:flex;gap:3px;flex-wrap:wrap;margin-top:12px}
+.hm-cell{width:16px;height:16px;border-radius:3px;cursor:pointer;transition:transform .1s;position:relative}
+.hm-cell:hover{transform:scale(1.3);z-index:2}
+.hm-0{background:var(--bg4)}.hm-1{background:#052e16}.hm-2{background:#14532d}.hm-3{background:#15803d}.hm-4{background:var(--green)}
+.hm-today{outline:2px solid var(--accent);outline-offset:1px}
+.hm-legend{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:11px;color:var(--muted)}
+.hm-box{width:12px;height:12px;border-radius:2px}
+
+/* MISSIONS */
+.ms-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.ms-item:last-child{border-bottom:none}
+.ms-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.ms-body{flex:1}
+.ms-name{font-size:14px;font-weight:600;margin-bottom:2px}
+.ms-sub{font-size:12px;color:var(--muted)}
+.ms-right{width:130px;flex-shrink:0}
+.ms-track{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-bottom:4px}
+.ms-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.ms-pct{font-size:11px;font-weight:700;text-align:right}
+
+/* SETTINGS */
+.settings{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end}
+
+/* TOOLTIP */
+.tooltip{position:fixed;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:12px;pointer-events:none;z-index:999;display:none;color:var(--text)}
+
+.flex-bet{display:flex;align-items:center;justify-content:space-between}
+.err{border-color:var(--red) !important}
+
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;height:60vh;color:var(--muted);font-size:12px;letter-spacing:2px;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div class="setup" id="setupScreen">
+  <div class="setup-box">
+    <div class="setup-logo">AG VISUALS</div>
+    <div class="setup-sub">Enter your Supabase credentials to connect your database. One time only.</div>
+    <div class="setup-label">Supabase Project URL</div>
+    <input class="setup-input" id="setupUrl" placeholder="https://xxxx.supabase.co" type="url">
+    <div class="setup-label">Supabase Anon Key</div>
+    <input class="setup-input" id="setupKey" placeholder="eyJhbGciOiJIUzI1NiIs..." type="text">
+    <button class="setup-btn" onclick="connect()">Connect & Launch War Room</button>
+    <div class="setup-err" id="setupErr">Could not connect. Check your URL and key and try again.</div>
+    <div class="setup-note">
+      Where to find these: Supabase → Settings → API<br>
+      • Project URL = the URL at the top<br>
+      • Anon key = Legacy anon, service_role API keys → anon public
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="wr" id="app" style="display:none">
+
+  <div class="header">
+    <div class="logo">AG VISUALS <span>War Room</span></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase" id="dateLabel"></span>
+      <span class="status-pill pill-behind" id="statusPill">BEHIND</span>
+    </div>
+  </div>
+
+  <div id="mainContent"><div class="loading">Loading War Room...</div></div>
+
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+let SB = null;
+let sales = [];
+let settings = { monthly_target: 15000, annual_goal: 100000, retainer_goal: 10000, daily_goal: 1000 };
+let chartInst = null;
+let activeTab = 'week';
+const TYPE_LABELS = { retainer: 'Brand Retainer', realestate: 'Real Estate', drone: 'Drone Add-on', custom: 'Custom' };
+
+// ─── SETUP ───────────────────────────────────────────────
+async function connect() {
+  const url = document.getElementById('setupUrl').value.trim();
+  const key = document.getElementById('setupKey').value.trim();
+  const errEl = document.getElementById('setupErr');
+  errEl.style.display = 'none';
+  if (!url || !key) { errEl.textContent = 'Both fields are required.'; errEl.style.display = 'block'; return; }
+  try {
+    SB = supabase.createClient(url, key);
+    const { error } = await SB.from('settings').select('id').limit(1);
+    if (error) throw error;
+    localStorage.setItem('ag_sb_url', url);
+    localStorage.setItem('ag_sb_key', key);
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    await fetchAll();
+  } catch(e) {
+    errEl.textContent = 'Could not connect. Check your URL and key.';
+    errEl.style.display = 'block';
+  }
+}
+
+// ─── HELPERS ─────────────────────────────────────────────
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function weekMon(ds) {
+  const d = new Date(ds+'T12:00:00');
+  const diff = d.getDate() - d.getDay() + (d.getDay()===0?-6:1);
+  const m = new Date(d); m.setDate(diff);
+  return `${m.getFullYear()}-${String(m.getMonth()+1).padStart(2,'0')}-${String(m.getDate()).padStart(2,'0')}`;
+}
+function moKey(ds) { return ds.slice(0,7); }
+function daysInMo(y,m) { return new Date(y,m,0).getDate(); }
+function fmt(n) { return '$'+Math.round(n).toLocaleString(); }
+function pct(a,b) { return b===0?0:Math.min(100,Math.round(a/b*100)); }
+function tier(p) {
+  if(p>=100) return {cls:'t100',label:'Crushed'};
+  if(p>=75) return {cls:'t75',label:'Almost'};
+  if(p>=50) return {cls:'t50',label:'Halfway'};
+  return {cls:'t0',label:'In progress'};
+}
+
+// ─── DATA ─────────────────────────────────────────────────
+async function fetchAll() {
+  const [{ data: s }, { data: st }] = await Promise.all([
+    SB.from('sales').select('*').order('created_at', { ascending: false }),
+    SB.from('settings').select('*').eq('id', 1).single()
+  ]);
+  sales = s || [];
+  if (st) settings = st;
+  render();
+}
+
+async function logSale() {
+  const amtEl = document.getElementById('saleAmt');
+  const amt = parseFloat(amtEl.value);
+  if (!amt || amt <= 0) { amtEl.classList.add('err'); setTimeout(()=>amtEl.classList.remove('err'),800); return; }
+  const btn = document.getElementById('logBtn');
+  btn.disabled = true; btn.textContent = '...';
+  await SB.from('sales').insert([{
+    date: todayStr(),
+    amount: Math.round(amt),
+    type: document.getElementById('saleType').value,
+    note: document.getElementById('saleNote').value.trim()
+  }]);
+  amtEl.value = '';
+  document.getElementById('saleNote').value = '';
+  btn.disabled = false; btn.textContent = '+ Close';
+  await fetchAll();
+}
+
+async function deleteSale(id) {
+  await SB.from('sales').delete().eq('id', id);
+  await fetchAll();
+}
+
+async function saveSettings() {
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  const payload = {
+    id: 1,
+    monthly_target: parseInt(document.getElementById('setMonthly').value)||15000,
+    annual_goal: parseInt(document.getElementById('setAnnual').value)||100000,
+    retainer_goal: parseInt(document.getElementById('setRetainer').value)||10000,
+    daily_goal: parseInt(document.getElementById('setDaily').value)||1000
+  };
+  await SB.from('settings').upsert(payload);
+  btn.disabled = false; btn.textContent = 'Save';
+  await fetchAll();
+}
+
+// ─── RENDER ──────────────────────────────────────────────
+function render() {
+  const today = todayStr();
+  const now = new Date();
+  const totalDays = daysInMo(now.getFullYear(), now.getMonth()+1);
+  const daysLeft = totalDays - now.getDate() + 1;
+  const wk = weekMon(today);
+  const mo = moKey(today);
+
+  const dayTotal = sales.filter(s=>s.date===today).reduce((a,s)=>a+s.amount,0);
+  const weekTotal = sales.filter(s=>weekMon(s.date)===wk).reduce((a,s)=>a+s.amount,0);
+  const monthTotal = sales.filter(s=>moKey(s.date)===mo).reduce((a,s)=>a+s.amount,0);
+  const retainerTotal = sales.filter(s=>moKey(s.date)===mo&&s.type==='retainer').reduce((a,s)=>a+s.amount,0);
+  const reCount = sales.filter(s=>moKey(s.date)===mo&&s.type==='realestate').length;
+  const gap = Math.max(0, settings.monthly_target - monthTotal);
+  const needed = settings.daily_goal;
+  const dayGoal = settings.daily_goal;
+  const weekGoal = Math.round(settings.daily_goal * 7);
+  const annualPace = monthTotal * 12;
+
+  const status = dayTotal >= needed && needed > 0 ? 'hit' : dayTotal >= needed * 0.7 ? 'close' : 'behind';
+
+  document.getElementById('dateLabel').textContent = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  const pill = document.getElementById('statusPill');
+  pill.className = 'status-pill ' + (status==='hit'?'pill-hit':status==='close'?'pill-close':'pill-behind');
+  pill.textContent = status==='hit'?'ON PACE':status==='close'?'CLOSE':'BEHIND';
+
+  const todaySales = sales.filter(s=>s.date===today);
+
+  document.getElementById('mainContent').innerHTML = `
+    <!-- BATTLE TARGET -->
+    <div class="battle">
+      <div class="sec-label">Today's Battle Target</div>
+      <div class="bt-main">
+        <div>
+          <div class="bt-num ${status==='hit'?'c-hit':status==='close'?'c-close':'c-behind'}">${fmt(needed)}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">needed today to stay on pace</div>
+        </div>
+        <div class="bt-meta">
+          <div class="bt-row"><span>Closed today</span><span style="font-weight:600;color:var(--green)">${fmt(dayTotal)}</span></div>
+          <div class="bt-row"><span>Monthly target</span><span style="font-weight:600">${fmt(settings.monthly_target)}</span></div>
+          <div class="bt-row"><span>Month closed</span><span style="font-weight:600">${fmt(monthTotal)}</span></div>
+          <div class="bt-row"><span>Days left</span><span style="font-weight:600">${daysLeft} days</span></div>
+          <div class="bt-row"><span>Gap</span><span style="font-weight:600;color:var(--amber)">${fmt(gap)}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCOREBOARD -->
+    <div class="scoreboard">
+      ${renderScoreCard('Today', dayTotal, dayGoal, 'var(--blue)', '🔥 ON FIRE')}
+      ${renderScoreCard('This Week', weekTotal, weekGoal, 'var(--amber)', '⚡ CRUSHING IT')}
+      ${renderScoreCard('This Month', monthTotal, settings.monthly_target, 'var(--green)', '💰 LEGEND')}
+    </div>
+
+    <!-- LOG SALE -->
+    <div class="card">
+      <div class="flex-bet">
+        <span class="sec-title">Log a Close</span>
+        <button class="btn-sm" onclick="document.getElementById('logList').style.display=document.getElementById('logList').style.display==='none'?'block':'none'">Show / Hide Log</button>
+      </div>
+      <div class="log-form">
+        <div class="fg">
+          <label class="fl">Sale Type</label>
+          <select class="fi" id="saleType">
+            <option value="retainer">Brand Retainer</option>
+            <option value="realestate">Real Estate Job</option>
+            <option value="drone">Drone Add-on</option>
+            <option value="custom">Custom Package</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="fl">Amount ($)</label>
+          <input class="fi" type="number" id="saleAmt" placeholder="e.g. 2500" min="0">
+        </div>
+        <div class="fg">
+          <label class="fl">Client / Note</label>
+          <input class="fi" type="text" id="saleNote" placeholder="e.g. Downtown loft">
+        </div>
+        <button class="btn-primary" id="logBtn" onclick="logSale()">+ Close</button>
+      </div>
+      <div id="logList" class="log-list">
+        ${todaySales.length===0
+          ? '<div class="empty">No closes today. Get on the phone.</div>'
+          : [...todaySales].reverse().map(s=>`
+            <div class="le">
+              <span class="le-type">${TYPE_LABELS[s.type]||s.type}</span>
+              <span class="le-note">${s.note||''}</span>
+              <span class="le-amt">+${fmt(s.amount)}</span>
+              <button class="le-del" onclick="deleteSale(${s.id})">×</button>
+            </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- CHART -->
+    <div class="card">
+      <div class="chart-hdr">
+        <span class="sec-title">Revenue Chart</span>
+        <div class="tabs">
+          <button class="tab ${activeTab==='week'?'active':''}" onclick="switchTab('week',this)">This Week</button>
+          <button class="tab ${activeTab==='month'?'active':''}" onclick="switchTab('month',this)">This Month</button>
+        </div>
+      </div>
+      <div style="position:relative;height:200px"><canvas id="chart"></canvas></div>
+    </div>
+
+    <!-- HEATMAP -->
+    <div class="card">
+      <div class="flex-bet" style="margin-bottom:4px">
+        <span class="sec-title">Consistency Streak</span>
+        <span style="font-size:12px;color:var(--muted)" id="streakLbl"></span>
+      </div>
+      <div style="font-size:11px;color:var(--muted)">Every green square = a day you closed. Don't break the chain.</div>
+      <div class="hm-grid" id="hmGrid"></div>
+      <div class="hm-legend">
+        <span>Less</span>
+        <div class="hm-box" style="background:var(--bg4)"></div>
+        <div class="hm-box" style="background:#14532d"></div>
+        <div class="hm-box" style="background:#15803d"></div>
+        <div class="hm-box" style="background:var(--green)"></div>
+        <span>More</span>
+      </div>
+    </div>
+
+    <!-- MISSIONS -->
+    <div class="card">
+      <div class="flex-bet" style="margin-bottom:12px">
+        <span class="sec-title">The Real Mission</span>
+      </div>
+      ${renderMission('🎯','#1c1100','#f59e0b','Monthly Revenue Target',`${fmt(monthTotal)} closed — ${fmt(Math.max(0,settings.monthly_target-monthTotal))} to go`,monthTotal,settings.monthly_target)}
+      ${renderMission('📋','#0c1a3a','#3b82f6','Retainer Revenue This Month',`${fmt(retainerTotal)} in retainers — target ${fmt(settings.retainer_goal)}/mo`,retainerTotal,settings.retainer_goal)}
+      ${renderMission('🏆','#1a0a2e','#a855f7',`$${Math.round(settings.annual_goal/1000)}K Annual Goal`,`On pace for ${fmt(annualPace)}/yr — need ${fmt(Math.round(settings.annual_goal/12))}/mo avg`,Math.min(settings.annual_goal,annualPace),settings.annual_goal)}
+      ${renderMission('📸','#052e16','#22c55e','Real Estate Jobs This Month',`${reCount} job${reCount===1?'':'s'} closed — every shoot is a retainer pitch`,reCount,10)}
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="settings">
+      <div class="fg"><label class="fl">Daily Goal ($)</label><input class="fi" type="number" id="setDaily" value="${settings.daily_goal}" min="0" step="100"></div>
+      <div class="fg"><label class="fl">Monthly Target ($)</label><input class="fi" type="number" id="setMonthly" value="${settings.monthly_target}" min="0" step="500"></div>
+      <div class="fg"><label class="fl">Annual Goal ($)</label><input class="fi" type="number" id="setAnnual" value="${settings.annual_goal}" min="0" step="1000"></div>
+      <div class="fg"><label class="fl">Retainer Goal ($/mo)</label><input class="fi" type="number" id="setRetainer" value="${settings.retainer_goal}" min="0" step="500"></div>
+      <button class="btn-primary" id="saveBtn" onclick="saveSettings()">Save</button>
+    </div>
+  `;
+
+  renderChart();
+  renderHeatmap(today, now, totalDays);
+}
+
+function renderScoreCard(label, val, goal, color, fire) {
+  const p = pct(val, goal);
+  const t = tier(p);
+  return `<div class="sc ${p>=75?'hot':''}">
+    <div class="fire">${fire}</div>
+    <div class="sec-label">${label}</div>
+    <div class="sc-num" style="color:${color}">${fmt(val)}</div>
+    <div class="sc-sub">of ${fmt(goal)} target</div>
+    <div class="xp-wrap"><div class="xp-fill" style="width:${Math.max(0,p)}%;background:${color}"></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;font-weight:600;color:${color}">${p}%</span>
+      <span class="tier ${t.cls}">${t.label}</span>
+    </div>
+  </div>`;
+}
+
+function renderMission(icon, bg, color, name, sub, cur, tgt) {
+  const p = tgt===0?0:Math.min(100,Math.round(cur/tgt*100));
+  return `<div class="ms-item">
+    <div class="ms-icon" style="background:${bg}">${icon}</div>
+    <div class="ms-body"><div class="ms-name">${name}</div><div class="ms-sub">${sub}</div></div>
+    <div class="ms-right">
+      <div class="ms-track"><div class="ms-fill" style="width:${p}%;background:${color}"></div></div>
+      <div class="ms-pct" style="color:${color}">${p}%</div>
+    </div>
+  </div>`;
+}
+
+function renderChart() {
+  const ctx = document.getElementById('chart');
+  if (!ctx) return;
+  if (chartInst) { chartInst.destroy(); chartInst = null; }
+  const today = todayStr();
+  const now = new Date();
+  let labels=[], data=[], colors=[];
+
+  if (activeTab==='week') {
+    const dow = now.getDay();
+    const mon = new Date(now); mon.setDate(now.getDate()-(dow===0?6:dow-1));
+    ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach((_,i)=>{
+      const d = new Date(mon); d.setDate(mon.getDate()+i);
+      const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      labels.push(['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]);
+      data.push(sales.filter(s=>s.date===ds).reduce((a,s)=>a+s.amount,0));
+      colors.push(ds===today?'#f59e0b':'#3b82f6');
+    });
+  } else {
+    const total = daysInMo(now.getFullYear(),now.getMonth()+1);
+    const weeks={};
+    for(let i=1;i<=total;i++){
+      const d = new Date(now.getFullYear(),now.getMonth(),i);
+      const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const wk = weekMon(ds); if(!weeks[wk]) weeks[wk]=0;
+      weeks[wk]+=sales.filter(s=>s.date===ds).reduce((a,s)=>a+s.amount,0);
+    }
+    Object.keys(weeks).sort().forEach((k,i)=>{ labels.push('W'+(i+1)); data.push(weeks[k]); colors.push('#22c55e'); });
+  }
+
+  chartInst = new Chart(ctx, {
+    type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:4,borderSkipped:false}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Closed: '+fmt(c.raw)},backgroundColor:'#1a1a1a',borderColor:'#333',borderWidth:1,titleColor:'#f0f0f0',bodyColor:'#999'}},
+      scales:{
+        x:{grid:{color:'#1a1a1a'},ticks:{color:'#666',font:{size:11}},border:{color:'#2a2a2a'}},
+        y:{grid:{color:'#1a1a1a'},ticks:{color:'#666',font:{size:11},callback:v=>'$'+Math.round(v).toLocaleString()},border:{color:'#2a2a2a'}}
+      }
+    }
+  });
+}
+
+function renderHeatmap(today, now, totalDays) {
+  const grid = document.getElementById('hmGrid');
+  if (!grid) return;
+  const dailyGoal = settings.daily_goal;
+  const byDay={};
+  for(const s of sales) byDay[s.date]=(byDay[s.date]||0)+s.amount;
+  const days=[];
+  for(let i=83;i>=0;i--){
+    const d=new Date(now); d.setDate(now.getDate()-i);
+    days.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+  }
+  let streak=0;
+  for(let i=days.length-1;i>=0;i--){
+    if(days[i]>today) continue;
+    if((byDay[days[i]]||0)>0) streak++;
+    else if(days[i]<today) break;
+  }
+  document.getElementById('streakLbl').textContent = streak>0?`${streak} day streak 🔥`:'0 day streak — close something today';
+  grid.innerHTML = days.map(ds=>{
+    const amt=byDay[ds]||0;
+    let lvl=0;
+    if(amt>0){if(amt>=dailyGoal)lvl=4;else if(amt>=dailyGoal*.75)lvl=3;else if(amt>=dailyGoal*.4)lvl=2;else lvl=1;}
+    return `<div class="hm-cell hm-${lvl}${ds===today?' hm-today':''}" onmouseenter="showTip(event,'${ds}',${amt})" onmouseleave="hideTip()"></div>`;
+  }).join('');
+}
+
+function switchTab(tab, el) {
+  activeTab = tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderChart();
+}
+
+function showTip(e,ds,amt) {
+  const t=document.getElementById('tooltip');
+  const d=new Date(ds+'T12:00:00');
+  t.textContent=d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+': '+(amt>0?fmt(amt):'Nothing closed');
+  t.style.display='block'; t.style.left=(e.clientX+12)+'px'; t.style.top=(e.clientY-8)+'px';
+}
+function hideTip(){ document.getElementById('tooltip').style.display='none'; }
+
+// ─── AUTO-CONNECT IF SAVED ────────────────────────────────
+window.addEventListener('load', async () => {
+  const url = localStorage.getItem('ag_sb_url');
+  const key = localStorage.getItem('ag_sb_key');
+  if (url && key) {
+    document.getElementById('setupUrl').value = url;
+    document.getElementById('setupKey').value = key;
+    SB = supabase.createClient(url, key);
+    try {
+      const { error } = await SB.from('settings').select('id').limit(1);
+      if (!error) {
+        document.getElementById('setupScreen').style.display='none';
+        document.getElementById('app').style.display='block';
+        await fetchAll();
+        return;
+      }
+    } catch(e){}
+  }
+});
+</script>
+</body>
+</html>
