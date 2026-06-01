@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AV Visuals — Sales Machine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080810;
+  --surface:#0E0E1A;
+  --surface2:#151525;
+  --surface3:#1C1C2E;
+  --border:#22223A;
+  --border2:#2C2C48;
+  --accent:#6C5CE7;
+  --accent-glow:rgba(108,92,231,0.18);
+  --cyan:#00D2FF;
+  --cyan-glow:rgba(0,210,255,0.12);
+  --gold:#F59E0B;
+  --gold-glow:rgba(245,158,11,0.12);
+  --green:#10B981;
+  --green-glow:rgba(16,185,129,0.12);
+  --red:#F87171;
+  --red-glow:rgba(248,113,113,0.12);
+  --pink:#EC4899;
+  --pink-glow:rgba(236,72,153,0.12);
+  --teal:#2DD4BF;
+  --teal-glow:rgba(45,212,191,0.12);
+  --purple:#A855F7;
+  --purple-glow:rgba(168,85,247,0.12);
+  --text:#EEEDF8;
+  --muted:#7A7A9A;
+  --faint:#3C3C58;
+  --display:'Bebas Neue',sans-serif;
+  --body:'Outfit',sans-serif;
+  --mono:'DM Mono',monospace;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--body);
+  padding:20px 16px 40px;
+  min-height:100vh;
+  font-size:14px;
+  line-height:1.5;
+}
+
+/* ── TOP BAR ── */
+.top-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:20px;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  font-family:var(--display);
+  font-size:28px;
+  letter-spacing:2px;
+  color:var(--text);
+  line-height:1;
+}
+.logo em{color:var(--accent);font-style:normal}
+.logo-sub{
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--muted);
+  letter-spacing:3px;
+  margin-top:3px;
+}
+.top-right{display:flex;gap:10px;align-items:center}
+.pill{
+  font-family:var(--mono);
+  font-size:9px;
+  letter-spacing:1.5px;
+  padding:4px 10px;
+  border-radius:20px;
+  border:1px solid var(--border2);
+  color:var(--muted);
+}
+.pill.accent{
+  background:var(--accent-glow);
+  border-color:rgba(108,92,231,0.35);
+  color:#A78BFA;
+}
+
+/* ── KPI STRIP ── */
+.kpi-strip{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:20px;
+}
+.kpi-hero{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px 18px;
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.kpi-hero::after{
+  content:'';
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:2px;
+  background:var(--accent);
+  opacity:0.7;
+}
+.kpi-hero-val{
+  font-family:var(--display);
+  font-size:22px;
+  letter-spacing:2px;
+  color:var(--accent);
+  line-height:1;
+}
+.kpi-hero-label{
+  font-family:var(--mono);
+  font-size:8px;
+  color:var(--muted);
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  margin-top:4px;
+}
+
+/* ── CALENDAR STRIP ── */
+.calendar-strip{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:20px;
+}
+.cal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+.cal-title{
+  font-family:var(--mono);
+  font-size:9px;
+  letter-spacing:2px;
+  color:var(--muted);
+}
+.cal-today-label{
+  font-family:var(--display);
+  font-size:13px;
+  letter-spacing:2px;
+  color:var(--accent);
+}
+.cal-days{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+}
+.cal-day{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  padding:7px 4px;
+  border-radius:8px;
+  border:1px solid transparent;
+  cursor:pointer;
+  transition:all 0.15s;
+  background:var(--surface2);
+}
+.cal-day:hover{
+  border-color:var(--border2);
+  background:var(--surface3);
+}
+.cal-day.active{
+  border-color:rgba(108,92,231,0.5);
+  background:var(--accent-glow);
+}
+.cal-day.today{
+  border-color:rgba(108,92,231,0.7);
+  background:rgba(108,92,231,0.15);
+}
+.cal-day-name{
+  font-family:var(--mono);
+  font-size:8px;
+  letter-spacing:1px;
+  color:var(--muted);
+}
+.cal-day.active .cal-day-name,
+.cal-day.today .cal-day-name{color:#A78BFA}
+.cal-day-dot{
+  width:5px;height:5px;
+  border-radius:50%;
+  background:var(--faint);
+}
+.cal-day.active .cal-day-dot,
+.cal-day.today .cal-day-dot{background:var(--accent)}
+.cal-day-focus{
+  font-family:var(--mono);
+  font-size:7px;
+  color:var(--faint);
+  text-align:center;
+  letter-spacing:0.3px;
+  line-height:1.3;
+}
+.cal-day.active .cal-day-focus,
+.cal-day.today .cal-day-focus{color:#A78BFA}
+
+/* ── TODAY BANNER ── */
+.today-banner{
+  background:linear-gradient(135deg,rgba(108,92,231,0.12),rgba(0,210,255,0.06));
+  border:1px solid rgba(108,92,231,0.3);
+  border-radius:10px;
+  padding:12px 16px;
+  margin-bottom:20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.today-banner-left{}
+.today-banner-day{
+  font-family:var(--display);
+  font-size:24px;
+  letter-spacing:3px;
+  color:var(--text);
+  line-height:1;
+}
+.today-banner-focus{
+  font-family:var(--mono);
+  font-size:9px;
+  color:#A78BFA;
+  letter-spacing:1.5px;
+  margin-top:3px;
+}
+.today-banner-right{
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--muted);
+  text-align:right;
+}
+.today-banner-date{
+  font-family:var(--display);
+  font-size:14px;
+  letter-spacing:1px;
+  color:var(--faint);
+}
+
+/* ── SECTION DIVIDERS ── */
+.time-block{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:24px 0 12px;
+}
+.time-block-label{
+  font-family:var(--display);
+  font-size:13px;
+  letter-spacing:3px;
+  color:var(--faint);
+  white-space:nowrap;
+}
+.time-block-line{flex:1;height:1px;background:var(--border)}
+.time-block-tag{
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--muted);
+  letter-spacing:1px;
+  white-space:nowrap;
+  padding:3px 9px;
+  border:1px solid var(--border2);
+  border-radius:4px;
+}
+
+/* ── CARDS ── */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px 20px;
+  position:relative;
+  overflow:hidden;
+}
+.card-accent-bar{
+  position:absolute;
+  top:0;left:0;right:0;
+  height:2px;
+}
+.card-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  margin-bottom:8px;
+  gap:12px;
+}
+.card-title-group{}
+.card-num{
+  font-family:var(--mono);
+  font-size:9px;
+  color:var(--faint);
+  letter-spacing:1px;
+  margin-bottom:2px;
+}
+.card-title{
+  font-family:var(--display);
+  font-size:22px;
+  letter-spacing:1.5px;
+  color:var(--text);
+  line-height:1.1;
+}
+.time-tag{
+  font-family:var(--mono);
+  font-size:9px;
+  padding:4px 10px;
+  border-radius:5px;
+  white-space:nowrap;
+  border:1px solid;
+  letter-spacing:0.5px;
+  margin-top:3px;
+}
+.card-desc{
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:14px;
+  line-height:1.55;
+}
+.card-desc strong{color:var(--text);font-weight:600}
+
+/* ── DIVIDER ── */
+.divider{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:8px;
+  margin:12px 0 10px;
+}
+.divider-line{height:1px;background:var(--border)}
+.divider-label{
+  font-family:var(--mono);
+  font-size:8px;
+  color:var(--faint);
+  letter-spacing:2px;
+  white-space:nowrap;
+}
+
+/* ── CHECKLIST ── */
+.checklist{list-style:none;display:flex;flex-direction:column;gap:7px}
+.checklist li{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  font-size:12px;
+  font-weight:400;
+  color:var(--muted);
+  line-height:1.45;
+  cursor:pointer;
+  transition:color 0.12s;
+  user-select:none;
+}
+.checklist li:hover{color:var(--text)}
+.check-box{
+  width:15px;height:15px;min-width:15px;
+  border:1.5px solid var(--faint);
+  border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.12s;
+  margin-top:1px;
+  flex-shrink:0;
+}
+.check-box.done{background:var(--green);border-color:var(--green)}
+.check-box.done::after{content:'✓';font-size:9px;color:#fff;font-weight:700}
+.checklist li.done-item{text-decoration:line-through;opacity:0.35}
+
+/* ── VOL BARS ── */
+.vol-bar{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.vol-label{font-family:var(--mono);font-size:9px;color:var(--muted);min-width:150px;letter-spacing:0.3px}
+.vol-track{flex:1;height:4px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.vol-fill{height:100%;border-radius:3px}
+.vol-count{font-family:var(--mono);font-size:10px;color:var(--faint);min-width:30px;text-align:right}
+
+/* ── TAGS ── */
+.tag{
+  display:inline-block;
+  font-family:var(--mono);
+  font-size:8px;
+  padding:2px 7px;
+  border-radius:3px;
+  font-weight:500;
+  margin:2px 2px 2px 0;
+  letter-spacing:0.3px;
+}
+.tag-re{background:rgba(108,92,231,0.12);color:#A78BFA;border:1px solid rgba(108,92,231,0.25)}
+.tag-brand{background:rgba(245,158,11,0.1);color:#FCD34D;border:1px solid rgba(245,158,11,0.2)}
+.tag-both{background:rgba(16,185,129,0.1);color:#6EE7B7;border:1px solid rgba(16,185,129,0.2)}
+
+/* ── RETENTION GRID ── */
+.r-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.r-item{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:11px 13px;
+}
+.r-item-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px}
+.r-item-desc{font-size:10px;color:var(--muted);line-height:1.45}
+.r-kpi{font-family:var(--mono);font-size:8px;color:var(--green);margin-top:5px;letter-spacing:0.5px}
+
+/* ── REVENUE TARGET ── */
+.rev-row{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface2);
+  border-radius:8px;
+  padding:10px 14px;
+  margin-top:12px;
+  border:1px solid var(--border2);
+}
+.rev-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.5px}
+.rev-val{font-family:var(--display);font-size:20px;letter-spacing:1px}
+
+/* ── LAYOUT ── */
+.full{margin-bottom:12px}
+.checklist-two{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+
+/* ── SATURDAY BOX ── */
+.saturday-box{
+  background:linear-gradient(135deg,rgba(108,92,231,0.08),rgba(0,210,255,0.05));
+  border:1px solid rgba(108,92,231,0.2);
+  border-radius:8px;
+  padding:12px 14px;
+  margin-bottom:14px;
+}
+.saturday-box-label{
+  font-family:var(--display);
+  font-size:13px;
+  letter-spacing:2px;
+  color:#A78BFA;
+  margin-bottom:8px;
+}
+
+/* ── DAY-SPECIFIC CARD ── */
+.day-only-card{
+  border:1px solid rgba(108,92,231,0.3);
+}
+.day-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  font-family:var(--mono);
+  font-size:8px;
+  padding:3px 9px;
+  border-radius:4px;
+  letter-spacing:1px;
+  background:rgba(108,92,231,0.15);
+  border:1px solid rgba(108,92,231,0.35);
+  color:#A78BFA;
+  margin-bottom:10px;
+}
+.day-badge-dot{
+  width:5px;height:5px;
+  border-radius:50%;
+  background:var(--accent);
+}
+
+/* ── HIDDEN ── */
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div>
+    <div class="logo">AV<em>VISUALS</em> SALES MACHINE</div>
+    <div class="logo-sub">ATLANTA, GA &nbsp;·&nbsp; DAILY OPS SYSTEM</div>
+  </div>
+  <div class="top-right">
+    <span class="pill accent">@AGVISUALSRE</span>
+    <span class="pill">v3.0</span>
+  </div>
+</div>
+
+<!-- KPI STRIP -->
+<div class="kpi-strip">
+  <div class="kpi-hero">
+    <div class="kpi-hero-val">AV VISUALS SALES MACHINE</div>
+    <div class="kpi-hero-label">3 HOURS A DAY · EVERY DAY</div>
+  </div>
+  <div class="kpi-hero" style="--accent:var(--cyan)">
+    <div class="kpi-hero-val" style="color:var(--cyan);font-size:16px">60 SMS · 10 COLLAB DMs · $15 ADS</div>
+    <div class="kpi-hero-label">DAILY NON-NEGOTIABLES</div>
+  </div>
+</div>
+
+<!-- CALENDAR STRIP -->
+<div class="calendar-strip">
+  <div class="cal-header">
+    <div class="cal-title">WEEKLY FOCUS CALENDAR</div>
+    <div class="cal-today-label" id="calTodayLabel">—</div>
+  </div>
+  <div class="cal-days" id="calDays"></div>
+</div>
+
+<!-- TODAY BANNER -->
+<div class="today-banner" id="todayBanner">
+  <div class="today-banner-left">
+    <div class="today-banner-day" id="bannerDay">—</div>
+    <div class="today-banner-focus" id="bannerFocus">—</div>
+  </div>
+  <div class="today-banner-right">
+    <div class="today-banner-date" id="bannerDate">—</div>
+    <div style="font-size:9px;margin-top:3px;color:var(--faint)">VIEWING DAY</div>
+  </div>
+</div>
+
+<!-- ═══ OUTREACH ENGINE (EVERY DAY) ═══ -->
+<div class="time-block">
+  <div class="time-block-label">OUTREACH ENGINE</div>
+  <div class="time-block-line"></div>
+  <div class="time-block-tag">9:00 AM — 12:00 PM</div>
+</div>
+
+<div class="full">
+  <div class="card">
+    <div class="card-accent-bar" style="background:var(--cyan)"></div>
+    <div class="card-header">
+      <div class="card-title-group">
+        <div class="card-num">01 — EVERY DAY</div>
+        <div class="card-title">Outreach Engine</div>
+      </div>
+      <span class="time-tag" style="color:var(--cyan);border-color:rgba(0,210,255,0.3);background:var(--cyan-glow)">1–2 HOURS</span>
+    </div>
+    <div class="card-desc">This is where revenue starts. <strong>No distractions. No excuses.</strong> Execute the volume every single day.</div>
+
+    <div class="divider"><div class="divider-line"></div><div class="divider-label">DAILY VOLUME</div><div class="divider-line"></div></div>
+    <div style="margin-bottom:14px">
+      <div class="vol-bar"><div class="vol-label">SMS OUTREACH</div><div class="vol-track"><div class="vol-fill" style="width:100%;background:var(--cyan)"></div></div><div class="vol-count">60/day</div></div>
+      <div class="vol-bar"><div class="vol-label">COLLAB DMs (RE + BUILDERS)</div><div class="vol-track"><div class="vol-fill" style="width:66%;background:var(--purple)"></div></div><div class="vol-count">10/day</div></div>
+      <div class="vol-bar"><div class="vol-label">CONTRACTOR SMS</div><div class="vol-track"><div class="vol-fill" style="width:33%;background:var(--gold)"></div></div><div class="vol-count">20/day</div></div>
+      <div class="vol-bar"><div class="vol-label">ACCOUNT ENGAGEMENT</div><div class="vol-track"><div class="vol-fill" style="width:40%;background:var(--green)"></div></div><div class="vol-count">20 acc</div></div>
+    </div>
+
+    <div class="divider"><div class="divider-line"></div><div class="divider-label">DAILY CHECKLIST</div><div class="divider-line"></div></div>
+    <div class="checklist-two">
+      <ul class="checklist">
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Confirm 1 post is going live today — don't skip</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Verify $15/day in ads is actively running</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Send 60 SMS outreach via OpenPhone — answer all replies</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Send 10 DMs to real estate agents or builders for collab</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Send 20 SMS to contractors you want to shoot for</span></li>
+      </ul>
+      <ul class="checklist">
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Engage with 20 contractor + RE agent accounts</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Ask for reviews via DM or text from previous clients</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Ask for referrals from past clients</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>If shooting today — post to story and tag the client</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Check for a collab opportunity this week — lock it in</span></li>
+      </ul>
+    </div>
+
+    <div class="divider"><div class="divider-line"></div><div class="divider-label">NETWORKING PREP</div><div class="divider-line"></div></div>
+    <ul class="checklist">
+      <li onclick="toggle(this)"><div class="check-box"></div><span>Identify 1 networking event or open house for this week — have it scheduled</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══ CONVERSION ENGINE (EVERY DAY) ═══ -->
+<div class="time-block">
+  <div class="time-block-label">CONVERSION ENGINE</div>
+  <div class="time-block-line"></div>
+  <div class="time-block-tag">3:00 PM — 4:00 PM</div>
+</div>
+
+<div class="full">
+  <div class="card">
+    <div class="card-accent-bar" style="background:var(--green)"></div>
+    <div class="card-header">
+      <div class="card-title-group">
+        <div class="card-num">02 — EVERY DAY</div>
+        <div class="card-title">Conversion Engine</div>
+      </div>
+      <span class="time-tag" style="color:var(--green);border-color:rgba(16,185,129,0.3);background:var(--green-glow)">3PM — 4PM</span>
+    </div>
+    <div class="card-desc">Turn warm leads into <strong>paying clients.</strong> Follow up, pitch, close. 1 hour of pure focus.</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-label">CONVERSION CHECKLIST</div><div class="divider-line"></div></div>
+    <div class="checklist-two">
+      <ul class="checklist">
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Review all DM/SMS replies from morning outreach</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Follow up with day-3 non-responders</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Send Loom video pitch to warm leads who asked for info</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Book discovery calls via Calendly link</span></li>
+      </ul>
+      <ul class="checklist">
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Handle objections from morning outreach</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Send booking confirmation to closed deals</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Update CRM — outcomes, revenue, next steps</span></li>
+      </ul>
+    </div>
+    <div class="rev-row">
+      <div class="rev-label">TARGET CLOSES / WEEK</div>
+      <div class="rev-val" style="color:var(--green)">2–3</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADS TRACKING (EVERY DAY) ═══ -->
+<div class="time-block">
+  <div class="time-block-label">ADS TRACKING</div>
+  <div class="time-block-line"></div>
+  <div class="time-block-tag">4:00 PM — 4:30 PM</div>
+</div>
+
+<div class="full">
+  <div class="card">
+    <div class="card-accent-bar" style="background:var(--teal)"></div>
+    <div class="card-header">
+      <div class="card-title-group">
+        <div class="card-num">03 — EVERY DAY</div>
+        <div class="card-title">Ads Tracking + Optimizing</div>
+      </div>
+      <span class="time-tag" style="color:var(--teal);border-color:rgba(45,212,191,0.3);background:var(--teal-glow)">4PM — 4:30PM</span>
+    </div>
+    <div class="card-desc"><strong>30 minutes.</strong> Check what's working. Kill what's not. $15/day must always be running — no exceptions.</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-label">TRACKING CHECKLIST</div><div class="divider-line"></div></div>
+    <div class="checklist-two">
+      <ul class="checklist">
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Confirm $15/day boost is active — if not, fix it now</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Check reach, impressions, and engagement on active posts</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Review paid boosts — CTR and DMs generated</span></li>
+      </ul>
+      <ul class="checklist">
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Kill or adjust underperforming boosted posts</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Note which content type performed best today</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Flag best organic post of the week (500+ reach) to boost next</span></li>
+      </ul>
+    </div>
+    <div class="rev-row">
+      <div class="rev-label">AD BUDGET / DAY</div>
+      <div class="rev-val" style="color:var(--teal)">$15</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RETENTION + GROWTH (EVERY DAY) ═══ -->
+<div class="time-block">
+  <div class="time-block-label">RETENTION + GROWTH</div>
+  <div class="time-block-line"></div>
+  <div class="time-block-tag">5:30 PM — 6:30 PM</div>
+</div>
+
+<div class="full">
+  <div class="card">
+    <div class="card-accent-bar" style="background:var(--red)"></div>
+    <div class="card-header">
+      <div class="card-title-group">
+        <div class="card-num">04 — EVERY DAY</div>
+        <div class="card-title">Retention + Growth</div>
+      </div>
+      <span class="time-tag" style="color:var(--red);border-color:rgba(248,113,113,0.3);background:var(--red-glow)">5:30PM — 6:30PM</span>
+    </div>
+    <div class="card-desc">Keep clients. Grow revenue per client. <strong>Churn is the enemy.</strong> This hour protects everything you built.</div>
+
+    <div class="r-grid">
+      <div class="r-item">
+        <div class="r-item-title">Monthly Results Report</div>
+        <div class="r-item-desc">Every retainer client gets views, engagement + leads generated. Send by 1st of month.</div>
+        <div class="r-kpi">KPI: Churn &lt; 10%</div>
+      </div>
+      <div class="r-item">
+        <div class="r-item-title">Monthly Check-In Call</div>
+        <div class="r-item-desc">15-min call last week of month. What worked, what's next, one upsell mention max.</div>
+        <div class="r-kpi">KPI: 100% retention</div>
+      </div>
+      <div class="r-item">
+        <div class="r-item-title">Post-Delivery Review Funnel</div>
+        <div class="r-item-desc">Day 0: Google review ask. Day 3: results check-in. Day 7: referral ask. No exceptions.</div>
+        <div class="r-kpi">KPI: 5-star reviews</div>
+      </div>
+      <div class="r-item">
+        <div class="r-item-title">AV Partner Perks</div>
+        <div class="r-item-desc">Top agents get 15% referral, priority scheduling, and AV Partner newsletter.</div>
+        <div class="r-kpi">KPI: 5+ partners by month 6</div>
+      </div>
+    </div>
+
+    <div class="divider"><div class="divider-line"></div><div class="divider-label">DAILY RETENTION CHECKLIST</div><div class="divider-line"></div></div>
+    <ul class="checklist">
+      <li onclick="toggle(this)"><div class="check-box"></div><span>Send day-3 or day-7 post-delivery follow-up if due today</span></li>
+      <li onclick="toggle(this)"><div class="check-box"></div><span>Review retainer client content — flag anything off-brand or late</span></li>
+      <li onclick="toggle(this)"><div class="check-box"></div><span>Respond to any Google or Instagram reviews</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══ MONDAY ONLY — CONTENT PLANNING ═══ -->
+<div class="time-block" id="mondaySection">
+  <div class="time-block-label">MONDAY ONLY</div>
+  <div class="time-block-line"></div>
+  <div class="time-block-tag">CONTENT PLANNING</div>
+</div>
+
+<div class="full" id="mondayCard">
+  <div class="card day-only-card">
+    <div class="card-accent-bar" style="background:var(--pink)"></div>
+    <div class="card-header">
+      <div class="card-title-group">
+        <div class="card-num">05 — MONDAY ONLY</div>
+        <div class="card-title">Content Planning</div>
+      </div>
+      <span class="time-tag" style="color:var(--pink);border-color:rgba(236,72,153,0.3);background:var(--pink-glow)">AFTER OUTREACH</span>
+    </div>
+    <div class="day-badge"><div class="day-badge-dot"></div>MONDAY ONLY</div>
+    <div class="card-desc">Set the week's content direction. <strong>Plan 10 pieces</strong> so you always have something ready — never scrambling.</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-label">CONTENT PLANNING CHECKLIST</div><div class="divider-line"></div></div>
+    <div class="checklist-two">
+      <ul class="checklist">
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Plan 10 pieces of content — hook, format, and CTA defined for each</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Check trending audio on Instagram/TikTok — note top 2</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Confirm collab post scheduled and partner tagged</span></li>
+      </ul>
+      <ul class="checklist">
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Review content calendar — flag anything behind schedule</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Assign each piece a day/platform for the week</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Batch-write captions for at least 3 pieces today</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SATURDAY ONLY — PERSONAL OUTREACH ═══ -->
+<div class="time-block" id="saturdaySection">
+  <div class="time-block-label">SATURDAY ONLY</div>
+  <div class="time-block-line"></div>
+  <div class="time-block-tag">IN-PERSON OUTREACH</div>
+</div>
+
+<div class="full" id="saturdayCard">
+  <div class="card day-only-card">
+    <div class="card-accent-bar" style="background:var(--gold)"></div>
+    <div class="card-header">
+      <div class="card-title-group">
+        <div class="card-num">06 — SATURDAY ONLY</div>
+        <div class="card-title">Personal Outreach</div>
+      </div>
+      <span class="time-tag" style="color:var(--gold);border-color:rgba(245,158,11,0.3);background:var(--gold-glow)">SAT ONLY</span>
+    </div>
+    <div class="day-badge" style="background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.35);color:#FCD34D"><div class="day-badge-dot" style="background:var(--gold)"></div>SATURDAY ONLY</div>
+    <div class="card-desc">Highest conversion channel — <strong>30–40% close rate.</strong> Show up where prospects already are.</div>
+    <div class="saturday-box">
+      <div class="saturday-box-label">Where to Go</div>
+      <ul class="checklist">
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Visit open houses in Sandy Springs, Buckhead, or Alpharetta</span></li>
+        <li onclick="toggle(this)"><div class="check-box"></div><span>Attend 1 networking event — real estate, entrepreneur, or local biz</span></li>
+      </ul>
+    </div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-label">AFTER EACH CONTACT</div><div class="divider-line"></div></div>
+    <ul class="checklist">
+      <li onclick="toggle(this)"><div class="check-box"></div><span>Add every warm contact to leads tracker same day</span></li>
+      <li onclick="toggle(this)"><div class="check-box"></div><span>Follow up with an Instagram DM before 6PM</span></li>
+    </ul>
+  </div>
+</div>
+
+<script>
+// ── TOGGLE ──
+function toggle(li){
+  const box = li.querySelector('.check-box');
+  const done = box.classList.contains('done');
+  if(done){box.classList.remove('done');li.classList.remove('done-item')}
+  else{box.classList.add('done');li.classList.add('done-item')}
+}
+
+// ── CALENDAR & DAY LOGIC ──
+const DAY_DATA = {
+  0: { name:'SUNDAY',   short:'SUN', focus:'REST + REVIEW',      color:'var(--muted)'  },
+  1: { name:'MONDAY',   short:'MON', focus:'OUTREACH + CONTENT', color:'var(--pink)'   },
+  2: { name:'TUESDAY',  short:'TUE', focus:'OUTREACH + CONVERT', color:'var(--cyan)'   },
+  3: { name:'WEDNESDAY',short:'WED', focus:'OUTREACH + CONVERT', color:'var(--accent)' },
+  4: { name:'THURSDAY', short:'THU', focus:'OUTREACH + CONVERT', color:'var(--purple)'  },
+  5: { name:'FRIDAY',   short:'FRI', focus:'OUTREACH + CONVERT', color:'var(--green)'  },
+  6: { name:'SATURDAY', short:'SAT', focus:'IN-PERSON OUTREACH', color:'var(--gold)'   },
+};
+
+let viewingDay = null; // null = real today
+
+function getRealToday(){ return new Date().getDay(); }
+
+function buildCalendar(activeDay){
+  const calDays = document.getElementById('calDays');
+  calDays.innerHTML = '';
+  const realToday = getRealToday();
+  [1,2,3,4,5,6,0].forEach(d => {
+    const data = DAY_DATA[d];
+    const div = document.createElement('div');
+    div.className = 'cal-day';
+    if(d === activeDay) div.classList.add('active');
+    if(d === realToday) div.classList.add('today');
+    div.innerHTML = `
+      <div class="cal-day-name">${data.short}</div>
+      <div class="cal-day-dot"></div>
+      <div class="cal-day-focus">${data.focus.replace(' + ','\n')}</div>
+    `;
+    div.addEventListener('click', () => switchDay(d));
+    calDays.appendChild(div);
+  });
+}
+
+function updateBanner(day){
+  const data = DAY_DATA[day];
+  const realToday = getRealToday();
+  document.getElementById('bannerDay').textContent = data.name;
+  document.getElementById('bannerDay').style.color = data.color;
+  document.getElementById('bannerFocus').textContent = '▸ ' + data.focus;
+  document.getElementById('calTodayLabel').textContent = data.name;
+
+  const now = new Date();
+  // If viewing a different day, just show the name
+  const isToday = day === realToday;
+  const dateStr = isToday
+    ? now.toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'})
+    : DAY_DATA[day].name;
+  document.getElementById('bannerDate').textContent = dateStr;
+}
+
+function showDaySections(day){
+  const mondaySec  = document.getElementById('mondaySection');
+  const mondayCard = document.getElementById('mondayCard');
+  const satSec     = document.getElementById('saturdaySection');
+  const satCard    = document.getElementById('saturdayCard');
+
+  // Monday
+  if(day === 1){
+    mondaySec.classList.remove('hidden');
+    mondayCard.classList.remove('hidden');
+  } else {
+    mondaySec.classList.add('hidden');
+    mondayCard.classList.add('hidden');
+  }
+  // Saturday
+  if(day === 6){
+    satSec.classList.remove('hidden');
+    satCard.classList.remove('hidden');
+  } else {
+    satSec.classList.add('hidden');
+    satCard.classList.add('hidden');
+  }
+}
+
+function switchDay(day){
+  viewingDay = day;
+  buildCalendar(day);
+  updateBanner(day);
+  showDaySections(day);
+}
+
+// Init on real today
+(function init(){
+  const today = getRealToday();
+  buildCalendar(today);
+  updateBanner(today);
+  showDaySections(today);
+})();
+</script>
+</body>
+</html>
